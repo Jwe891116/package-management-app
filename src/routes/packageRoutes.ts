@@ -5,7 +5,8 @@ import {
   addTwoDayPackage,
   getPackageDetails,
   updatePackageStatus,
-  getAllPackages
+  getAllPackages,
+  deletePackage
 } from '../controllers/packageController';
 
 const router = Router();
@@ -15,5 +16,6 @@ router.post('/packages/two-day', addTwoDayPackage);
 router.get('/packages/:trackingNumber', getPackageDetails);
 router.put('/packages/status', updatePackageStatus);
 router.get('/packages', getAllPackages); // Add this new route
+router.delete('/packages/:trackingNumber', deletePackage);
 
 export default router;

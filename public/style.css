@@ -221,3 +221,30 @@ tr:hover {
         width: 100%;
     }
 }
+
+.delete-btn {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.view-btn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.view-btn:hover {
+    background-color: #3367d6;
+}

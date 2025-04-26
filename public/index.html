@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Package Management System</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+128+Text&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -19,60 +20,6 @@
         </nav>
 
         <main>
-            <!-- Create Package Section -->
-            <section id="createPackageSection" class="active">
-                <h2>Create New Package</h2>
-                <div class="tabs">
-                    <button class="tab-btn active" data-type="one-day">One-Day Delivery</button>
-                    <button class="tab-btn" data-type="two-day">Two-Day Delivery</button>
-                </div>
-                
-                <form id="packageForm">
-                    <div class="form-group">
-                        <label for="senderName">Sender Name</label>
-                        <input type="text" id="senderName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="senderAddress">Sender Address</label>
-                        <textarea id="senderAddress" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="receiverName">Receiver Name</label>
-                        <input type="text" id="receiverName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="receiverAddress">Receiver Address</label>
-                        <textarea id="receiverAddress" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="weight">Weight (kg)</label>
-                        <input type="number" id="weight" min="0.1" step="0.1" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="costPerUnitWeight">Cost per kg ($)</label>
-                        <input type="number" id="costPerUnitWeight" min="0.1" step="0.1" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="flatFee">Flat Fee ($)</label>
-                        <input type="number" id="flatFee" min="0" step="0.1" required>
-                    </div>
-                    
-                    <button type="submit">Create Package</button>
-                </form>
-                
-                <div id="packageResult" class="result-container hidden">
-                    <h3>Package Created Successfully!</h3>
-                    <div id="packageDetails"></div>
-                    <button id="printLabelBtn">Print Label</button>
-                </div>
-            </section>
-
             <!-- Track Package Section -->
             <section id="trackPackageSection" class="hidden">
                 <h2>Track Package</h2>
@@ -138,9 +85,63 @@
                         </tr>
                     </thead>
                     <tbody id="packagesTableBody">
-                        <!-- Packages will be loaded here -->
+                        <tr><td colspan="7" class="no-packages">No packages loaded</td></tr>
                     </tbody>
                 </table>
+            </section>
+
+            <!-- Create Package Section -->
+            <section id="createPackageSection">
+                <h2>Create New Package</h2>
+                <div class="tabs">
+                    <button class="tab-btn active" data-type="one-day">One-Day Delivery</button>
+                    <button class="tab-btn" data-type="two-day">Two-Day Delivery</button>
+                </div>
+                
+                <form id="packageForm">
+                    <div class="form-group">
+                        <label for="senderName">Sender Name</label>
+                        <input type="text" id="senderName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="senderAddress">Sender Address</label>
+                        <textarea id="senderAddress" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="receiverName">Receiver Name</label>
+                        <input type="text" id="receiverName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="receiverAddress">Receiver Address</label>
+                        <textarea id="receiverAddress" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" min="0.1" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="costPerUnitWeight">Cost per kg ($)</label>
+                        <input type="number" id="costPerUnitWeight" min="0.1" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="flatFee">Flat Fee ($)</label>
+                        <input type="number" id="flatFee" min="0" step="0.1" required>
+                    </div>
+                    
+                    <button type="submit">Create Package</button>
+                </form>
+                
+                <div id="packageResult" class="result-container hidden">
+                    <h3>Package Created Successfully!</h3>
+                    <div id="packageDetails"></div>
+                    <button id="printLabelBtn">Print Label</button>
+                </div>
             </section>
         </main>
     </div>

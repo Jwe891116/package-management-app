@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalPages = 1;
     let currentPackageType = 'one-day';
     let currentPackageData = null;
+    let allPackages = [];
     
     // Event Listeners
     createPackageBtn.addEventListener('click', () => showSection('create'));
@@ -133,15 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             currentPackageData = data.package;
             
-            // Safely handle total_cost which might be string or number
-            const totalCost = parseFloat(data.package.total_cost);
-            
             // Display the result
-            packageDetails.innerHTML = `
-                <p><strong>Tracking Number:</strong> ${data.trackingNumber}</p>
-                <p><strong>Status:</strong> ${data.package.status}</p>
-                <p><strong>Total Cost:</strong> $${!isNaN(totalCost) ? totalCost.toFixed(2) : 'N/A'}</p>
-            `;
+            displayPackageDetails(data.package, data.trackingNumber);
             
             packageResult.classList.remove('hidden');
             packageForm.reset();
@@ -149,6 +143,20 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('Error creating package: ' + error.message);
             console.error('Error:', error);
         }
+    }
+    
+    function displayPackageDetails(pkg, trackingNumber = null) {
+        const totalCost = parseFloat(pkg.total_cost);
+        const trackingNum = trackingNumber || pkg.tracking_number;
+        
+        packageDetails.innerHTML = `
+            <p><strong>Tracking Number:</strong> ${trackingNum}</p>
+            <p><strong>Status:</strong> ${pkg.status}</p>
+            <p><strong>Shipping Method:</strong> ${pkg.shipping_method}</p>
+            <p><strong>Sender:</strong> ${pkg.sender_name}</p>
+            <p><strong>Receiver:</strong> ${pkg.receiver_name}</p>
+            <p><strong>Total Cost:</strong> $${!isNaN(totalCost) ? totalCost.toFixed(2) : 'N/A'}</p>
+        `;
     }
     
     function printLabel() {
@@ -219,6 +227,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
+            // First check if we have the package in our allPackages array
+            const localPackage = allPackages.find(pkg => pkg.tracking_number === trackingNumber);
+            
+            if (localPackage) {
+                currentPackageData = localPackage;
+                displayTrackedPackage(localPackage);
+                return;
+            }
+            
+            // If not found locally, fetch from server
             const response = await fetch(`/api/packages/${trackingNumber}`);
             
             if (!response.ok) {
@@ -228,38 +246,41 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const data = await response.json();
             currentPackageData = data.package;
+            displayTrackedPackage(data.package);
             
-            // Safely handle numeric values
-            const totalCost = parseFloat(data.package.total_cost);
-            const createdAt = new Date(data.package.created_at);
-            const updatedAt = data.package.updated_at ? new Date(data.package.updated_at) : null;
-            
-            // Display package info
-            packageInfo.innerHTML = `
-                <p><strong>Sender:</strong> ${data.package.sender_name}</p>
-                <p><strong>Receiver:</strong> ${data.package.receiver_name}</p>
-                <p><strong>Shipping Method:</strong> ${data.package.shipping_method}</p>
-                <p><strong>Status:</strong> ${data.package.status}</p>
-                <p><strong>Weight:</strong> ${data.package.weight} kg</p>
-                <p><strong>Total Cost:</strong> $${!isNaN(totalCost) ? totalCost.toFixed(2) : 'N/A'}</p>
-                <p><strong>Created:</strong> ${createdAt.toLocaleString()}</p>
-                ${updatedAt ? `<p><strong>Last Updated:</strong> ${updatedAt.toLocaleString()}</p>` : ''}
-                <div id="labelContent" class="hidden">${data.package.printLabel}</div>
-            `;
-            
-            // Show update status section if not delivered
-            if (data.package.status !== 'Delivered') {
-                statusSelect.value = data.package.status;
-                statusUpdateSection.classList.remove('hidden');
-            } else {
-                statusUpdateSection.classList.add('hidden');
-            }
-            
-            trackingResult.classList.remove('hidden');
         } catch (error) {
             showError('Error tracking package: ' + error.message);
             console.error('Error:', error);
         }
+    }
+    
+    function displayTrackedPackage(pkg) {
+        const totalCost = parseFloat(pkg.total_cost);
+        const createdAt = new Date(pkg.created_at);
+        const updatedAt = pkg.updated_at ? new Date(pkg.updated_at) : null;
+        
+        packageInfo.innerHTML = `
+            <p><strong>Tracking Number:</strong> ${pkg.tracking_number}</p>
+            <p><strong>Sender:</strong> ${pkg.sender_name}</p>
+            <p><strong>Receiver:</strong> ${pkg.receiver_name}</p>
+            <p><strong>Shipping Method:</strong> ${pkg.shipping_method}</p>
+            <p><strong>Status:</strong> ${pkg.status}</p>
+            <p><strong>Weight:</strong> ${pkg.weight} kg</p>
+            <p><strong>Total Cost:</strong> $${!isNaN(totalCost) ? totalCost.toFixed(2) : 'N/A'}</p>
+            <p><strong>Created:</strong> ${createdAt.toLocaleString()}</p>
+            ${updatedAt ? `<p><strong>Last Updated:</strong> ${updatedAt.toLocaleString()}</p>` : ''}
+        `;
+        
+        // Show update status section if not delivered
+        if (pkg.status !== 'Delivered') {
+            statusSelect.value = pkg.status;
+            statusUpdateSection.classList.remove('hidden');
+        } else {
+            statusUpdateSection.classList.add('hidden');
+        }
+        
+        trackingResult.classList.remove('hidden');
+        trackingResult.scrollIntoView({ behavior: 'smooth' });
     }
     
     async function updatePackageStatus() {
@@ -285,10 +306,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             currentPackageData = data.package;
             
+            // Update the package in our local cache
+            const packageIndex = allPackages.findIndex(pkg => pkg.tracking_number === data.package.tracking_number);
+            if (packageIndex !== -1) {
+                allPackages[packageIndex] = data.package;
+            }
+            
             // Update displayed status
             const statusElements = packageInfo.querySelectorAll('p');
-            if (statusElements.length >= 4) {
-                statusElements[3].innerHTML = `<strong>Status:</strong> ${data.package.status}`;
+            if (statusElements.length >= 5) {
+                statusElements[4].innerHTML = `<strong>Status:</strong> ${data.package.status}`;
             }
             
             // Hide update section if now delivered
@@ -334,52 +361,143 @@ document.addEventListener('DOMContentLoaded', function() {
             prevPageBtn.disabled = currentPage === 1;
             nextPageBtn.disabled = currentPage === totalPages;
             
+            // Store packages for quick access
+            allPackages = data.packages;
+            
             // Populate table
-            packagesTableBody.innerHTML = '';
+            renderPackagesTable(data.packages);
             
-            if (data.packages.length === 0) {
-                packagesTableBody.innerHTML = '<tr><td colspan="7" class="no-packages">No packages found</td></tr>';
-                return;
-            }
-            
-            data.packages.forEach(pkg => {
-                const totalCost = parseFloat(pkg.total_cost);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${pkg.tracking_number}</td>
-                    <td>${pkg.sender_name}</td>
-                    <td>${pkg.receiver_name}</td>
-                    <td>${pkg.shipping_method}</td>
-                    <td><span class="status-badge status-${pkg.status.toLowerCase().replace(' ', '-')}">${pkg.status}</span></td>
-                    <td>$${!isNaN(totalCost) ? totalCost.toFixed(2) : 'N/A'}</td>
-                    <td>
-                        <button class="view-btn" data-id="${pkg.tracking_number}">View</button>
-                    </td>
-                `;
-                packagesTableBody.appendChild(row);
-            });
-            
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    trackingNumberInput.value = btn.dataset.id;
-                    showSection('track');
-                    trackPackage();
-                });
-            });
         } catch (error) {
             showError('Error loading packages: ' + error.message);
             console.error('Error:', error);
         }
     }
     
+    function renderPackagesTable(packages) {
+        packagesTableBody.innerHTML = '';
+        
+        if (packages.length === 0) {
+            packagesTableBody.innerHTML = '<tr><td colspan="7" class="no-packages">No packages found</td></tr>';
+            return;
+        }
+        
+        packages.forEach(pkg => {
+            const totalCost = parseFloat(pkg.total_cost);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${pkg.tracking_number}</td>
+                <td>${pkg.sender_name}</td>
+                <td>${pkg.receiver_name}</td>
+                <td>${pkg.shipping_method}</td>
+                <td><span class="status-badge status-${pkg.status.toLowerCase().replace(' ', '-')}">${pkg.status}</span></td>
+                <td>$${!isNaN(totalCost) ? totalCost.toFixed(2) : 'N/A'}</td>
+                <td class="actions">
+                    <button class="view-btn" data-id="${pkg.tracking_number}">View</button>
+                    <button class="delete-btn" data-id="${pkg.tracking_number}">Delete</button>
+                </td>
+            `;
+            packagesTableBody.appendChild(row);
+        });
+        
+        // Add event listeners to view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                // Switch to track package section
+                showSection('track');
+                
+                // Set the tracking number
+                trackingNumberInput.value = btn.dataset.id;
+                
+                // Find the package in our local cache
+                const packageToView = allPackages.find(pkg => pkg.tracking_number === btn.dataset.id);
+                
+                if (packageToView) {
+                    currentPackageData = packageToView;
+                    displayTrackedPackage(packageToView);
+                } else {
+                    // If not found locally, fetch from server
+                    await trackPackage();
+                }
+            });
+        });
+        
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const trackingNumber = btn.dataset.id;
+                const row = btn.closest('tr');
+                
+                if (!confirm('Are you sure you want to delete this package?')) {
+                    return;
+                }
+                
+                try {
+                    btn.disabled = true;
+                    btn.textContent = 'Deleting...';
+                    
+                    const response = await fetch(`/api/packages/${trackingNumber}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to delete package');
+                    }
+                    
+                    // Visual feedback
+                    row.style.transition = 'opacity 0.5s';
+                    row.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        // Remove from local cache
+                        allPackages = allPackages.filter(pkg => pkg.tracking_number !== trackingNumber);
+                        
+                        // Re-render table
+                        renderPackagesTable(allPackages);
+                        
+                        showSuccess('Package deleted successfully');
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    btn.disabled = false;
+                    btn.textContent = 'Delete';
+                    showError(error.message || 'Failed to delete package');
+                }
+            });
+        });
+    }
+    
     // Utility functions
     function showError(message) {
-        alert(message); // Replace with a nicer notification system if needed
+        const errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        errorElement.textContent = message;
+        
+        document.querySelectorAll('.error-message').forEach(el => el.remove());
+        
+        const currentSection = document.querySelector('section:not(.hidden)');
+        currentSection.insertBefore(errorElement, currentSection.firstChild);
+        
+        setTimeout(() => {
+            errorElement.remove();
+        }, 5000);
     }
     
     function showSuccess(message) {
-        alert(message); // Replace with a nicer notification system if needed
+        const successElement = document.createElement('div');
+        successElement.className = 'success-message';
+        successElement.textContent = message;
+        
+        document.querySelectorAll('.success-message').forEach(el => el.remove());
+        
+        const currentSection = document.querySelector('section:not(.hidden)');
+        currentSection.insertBefore(successElement, currentSection.firstChild);
+        
+        setTimeout(() => {
+            successElement.remove();
+        }, 5000);
     }
     
     // Initialize

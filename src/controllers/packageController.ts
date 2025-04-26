@@ -178,7 +178,6 @@ export const getPackageDetails = async (req: Request, res: Response) => {
 
         const packageData = result.rows[0];
         
-        // Create appropriate package instance based on shipping method
         let packageInstance;
         if (packageData.shipping_method === 'One-Day') {
             packageInstance = new OneDay(
@@ -261,17 +260,11 @@ export const updatePackageStatus = async (req: Request, res: Response) => {
 
 export const getAllPackages = async (req: Request, res: Response) => {
     try {
-        // Optional query parameters for filtering
         const { status, shippingMethod, page = 1, limit = 10 } = req.query;
-        
-        // Calculate offset for pagination
         const offset = (Number(page) - 1) * Number(limit);
         
-        // Base query
         let query = `SELECT * FROM packages`;
         const queryParams = [];
-        
-        // Add WHERE clauses if filters are provided
         const whereClauses = [];
         
         if (status) {
@@ -288,19 +281,16 @@ export const getAllPackages = async (req: Request, res: Response) => {
             query += ` WHERE ${whereClauses.join(' AND ')}`;
         }
         
-        // Add ordering and pagination
         query += ` ORDER BY created_at DESC LIMIT $${whereClauses.length + 1} OFFSET $${whereClauses.length + 2}`;
         queryParams.push(Number(limit), offset);
         
-        // Execute the query
         const result = await pool.query(query, queryParams);
         
-        // Get total count for pagination metadata
         let countQuery = `SELECT COUNT(*) FROM packages`;
         if (whereClauses.length > 0) {
             countQuery += ` WHERE ${whereClauses.join(' AND ')}`;
         }
-        const countResult = await pool.query(countQuery, queryParams.slice(0, -2)); // Exclude limit and offset
+        const countResult = await pool.query(countQuery, queryParams.slice(0, -2));
         
         const totalPackages = parseInt(countResult.rows[0].count);
         const totalPages = Math.ceil(totalPackages / Number(limit));
@@ -316,6 +306,36 @@ export const getAllPackages = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Error fetching packages:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+export const deletePackage = async (req: Request, res: Response) => {
+    try {
+        const { trackingNumber } = req.params;
+
+        if (!trackingNumber) {
+            return res.status(400).json({ error: 'Tracking number is required' });
+        }
+
+        const query = `
+            DELETE FROM packages
+            WHERE tracking_number = $1
+            RETURNING *
+        `;
+
+        const result = await pool.query(query, [trackingNumber]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Package not found' });
+        }
+
+        res.status(200).json({
+            message: 'Package deleted successfully',
+            deletedPackage: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Error deleting package:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
