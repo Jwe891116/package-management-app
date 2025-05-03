@@ -12,13 +12,13 @@
         <header>
             <h1>Package Management System</h1>
         </header>
-
+        
         <nav>
             <button id="createPackageBtn">Create Package</button>
             <button id="trackPackageBtn">Track Package</button>
             <button id="managePackagesBtn">Manage Packages</button>
         </nav>
-
+        
         <main>
             <!-- Track Package Section -->
             <section id="trackPackageSection" class="hidden">
@@ -31,6 +31,7 @@
                 <div id="trackingResult" class="result-container hidden">
                     <h3>Package Details</h3>
                     <div id="packageInfo"></div>
+                    
                     <div id="statusUpdateSection" class="hidden">
                         <h4>Update Status</h4>
                         <select id="statusSelect">
@@ -41,10 +42,14 @@
                         </select>
                         <button id="updateStatusBtn">Update Status</button>
                     </div>
-                    <button id="printTrackedLabelBtn">Print Label</button>
+                    
+                    <div class="button-group">
+                        <button id="printTrackedLabelBtn">Print Label</button>
+                        <button id="deleteTrackedPackageBtn" class="delete-btn">Delete Package</button>
+                    </div>
                 </div>
             </section>
-
+            
             <!-- Manage Packages Section -->
             <section id="managePackagesSection" class="hidden">
                 <h2>Manage Packages</h2>
@@ -56,13 +61,11 @@
                         <option value="In Transit">In Transit</option>
                         <option value="Delivered">Delivered</option>
                     </select>
-                    
                     <select id="shippingMethodFilter">
                         <option value="">All Methods</option>
                         <option value="One-Day">One-Day</option>
                         <option value="Two-Day">Two-Day</option>
                     </select>
-                    
                     <button id="applyFiltersBtn">Apply Filters</button>
                 </div>
                 
@@ -89,7 +92,7 @@
                     </tbody>
                 </table>
             </section>
-
+            
             <!-- Create Package Section -->
             <section id="createPackageSection">
                 <h2>Create New Package</h2>
@@ -103,37 +106,30 @@
                         <label for="senderName">Sender Name</label>
                         <input type="text" id="senderName" required>
                     </div>
-                    
                     <div class="form-group">
                         <label for="senderAddress">Sender Address</label>
                         <textarea id="senderAddress" required></textarea>
                     </div>
-                    
                     <div class="form-group">
                         <label for="receiverName">Receiver Name</label>
                         <input type="text" id="receiverName" required>
                     </div>
-                    
                     <div class="form-group">
                         <label for="receiverAddress">Receiver Address</label>
                         <textarea id="receiverAddress" required></textarea>
                     </div>
-                    
                     <div class="form-group">
                         <label for="weight">Weight (kg)</label>
                         <input type="number" id="weight" min="0.1" step="0.1" required>
                     </div>
-                    
                     <div class="form-group">
                         <label for="costPerUnitWeight">Cost per kg ($)</label>
                         <input type="number" id="costPerUnitWeight" min="0.1" step="0.1" required>
                     </div>
-                    
                     <div class="form-group">
                         <label for="flatFee">Flat Fee ($)</label>
                         <input type="number" id="flatFee" min="0" step="0.1" required>
                     </div>
-                    
                     <button type="submit">Create Package</button>
                 </form>
                 
@@ -145,7 +141,7 @@
             </section>
         </main>
     </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>

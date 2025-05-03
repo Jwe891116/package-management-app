@@ -1,25 +1,22 @@
-// main.ts
 import express from 'express';
-import bodyParser from 'body-parser';
 import packageRoutes from './routes/packageRoutes';
 import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(bodyParser.json());
-app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Routes
-app.use('/api', packageRoutes as express.Router);  // This is correct usage
+app.use('/api', packageRoutes);
 
-// Serve index.html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

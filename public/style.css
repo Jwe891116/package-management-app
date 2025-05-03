@@ -206,7 +206,90 @@ tr:hover {
     padding: 10px;
 }
 
-/* Print label styles */
+/* Button group for track package actions */
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Delete button in track package section */
+#deleteTrackedPackageBtn {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#deleteTrackedPackageBtn:hover {
+    background-color: #cc0000;
+}
+
+#deleteTrackedPackageBtn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* View button in manage packages table */
+.view-btn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.view-btn:hover {
+    background-color: #3367d6;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: white;
+}
+
+.status-created {
+    background-color: #3498db;
+}
+
+.status-shipped {
+    background-color: #f39c12;
+}
+
+.status-in-transit {
+    background-color: #9b59b6;
+}
+
+.status-delivered {
+    background-color: #27ae60;
+}
+
+/* Messages */
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #c62828;
+}
+
+.success-message {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #2e7d32;
+}
+
+/* Print styles */
 @media print {
     body * {
         visibility: hidden;
@@ -220,31 +303,4 @@ tr:hover {
         top: 0;
         width: 100%;
     }
-}
-
-.delete-btn {
-    background-color: #ff4444;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 5px;
-}
-
-.delete-btn:hover {
-    background-color: #cc0000;
-}
-
-.view-btn {
-    background-color: #4285f4;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.view-btn:hover {
-    background-color: #3367d6;
 }
